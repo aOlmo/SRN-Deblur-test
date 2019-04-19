@@ -4,14 +4,13 @@ import glob
 import cv2
 import time
 
-
 from termcolor import colored
 from skimage.measure import compare_ssim as ssim
 from skimage.measure import compare_psnr as psnr
 import matplotlib.pyplot as plt
 
-BATCH_SIZE = 4
-TRAINING_IMGS = 100
+BATCH_SIZE = 2
+TRAINING_IMGS = 10
 EPOCHS = 2
 LR = 1e-4
 
@@ -46,7 +45,7 @@ def get_sorted_images(folder):
 
     return files
 
-def run(train_root, test_root, skip_to_metrics):
+def run(train_root, test_root, skip_to_metrics, verbose):
 
     test_name = test_root.split("/")[-1] if test_root.split("/")[-1] != "" else test_root.split("/")[-2]
 
@@ -74,6 +73,11 @@ def run(train_root, test_root, skip_to_metrics):
     start_time = time.time()
 
     if not skip_to_metrics:
+
+        print()
+        print("============== STARTING {} RUN ==============".format(colored(test_name, "red")))
+        print("="*(43+len(test_name)))
+
         # #################### CREATING DATALIST ####################
 
         print("[+]: Creating datalist")
@@ -92,7 +96,7 @@ def run(train_root, test_root, skip_to_metrics):
         print("[+]: Datalist created")
         print("=========================================")
 
-        # ###################### TRAINING MODEL ######################
+        # ###################### MODEL TRAINING ######################
 
         training_start_time = time.time()
 
@@ -102,25 +106,30 @@ def run(train_root, test_root, skip_to_metrics):
         print("=========================================")
 
         ret = os.popen(cmd_train).read()
-        print(ret)
+        if verbose:
+            print(ret)
 
         if ("Resource exhausted" in ret) or ("loss = " not in ret):
             print("[-]: Resource Exhausted error when training, exiting")
             exit()
 
         print("=========================================")
-        print("[+]: Model trained")
+        print("[+]: Model trained successfully")
 
         training_elapsed_time = time.time() - training_start_time
 
-        # ###################### TESTING MODEL ######################
+        # ###################### MODEL TESTING ######################
         testing_start_time = time.time()
 
         print("[+]: Creating test images")
         cmd_test = "python run_model.py --input_path=./testing_set/" + test_blur + " --output_path=./testing_res/" + test_results
         print("[+]: " + cmd_test)
         print("=========================================")
-        print(os.popen(cmd_test).read())
+
+        ret = os.popen(cmd_test).read()
+        if verbose:
+            print(ret)
+
         print("[+]: Test images created")
 
         testing_elapsed_time = time.time() - testing_start_time
@@ -176,12 +185,16 @@ def run(train_root, test_root, skip_to_metrics):
 
 if __name__ == '__main__':
 
+    datasets = ["flickr", "dogs", "gopro"]
+    defects = ["full_blur", "inpaint_blur", "inpaint_white"]
 
+    for dataset in datasets:
+        for defect in defects:
+            # NOTE: assuming under ./training_set/ and ./testing_set/ respectively
+            train_root = "{}/{}_{}/".format(dataset.upper(), dataset, defect)
+            test_root = "{}/{}_{}/".format(dataset.upper(), dataset, defect)
+            skip_to_metrics = False
+            verbose = True
 
-    # Warning: assuming under ./training_set/ and ./testing_set/ respectively
-    train_root = "FLICKR/flickr_full_blur/train_flickr_full_blur/"
-    test_root = "FLICKR/flickr_full_blur/"
-    skip_to_metrics = False
-
-    # NOTE: The output images will go under ./testing_res/
-    run(train_root, test_root, skip_to_metrics)
+            # NOTE: The output images will go under ./testing_res/
+            run(train_root, test_root, skip_to_metrics, verbose)
