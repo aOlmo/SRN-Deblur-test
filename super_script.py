@@ -152,7 +152,7 @@ def run(train_root, test_root, skip_to_metrics):
 
     print("Folder: {} | # of imgs: {}\n".format("./testing_res/" + test_results, total_imgs))
     print("======== Averages for {} test set ======== ".format(colored(test_name, "red")))
-    print("SSIM: {} \nPSNR: {}".format(ssim_avg, psnr_avg))
+    print("- SSIM: {} \n- PSNR: {}".format(ssim_avg, psnr_avg))
     print("="*(40+len(test_name)))
 
     print()
@@ -175,10 +175,13 @@ def run(train_root, test_root, skip_to_metrics):
 
 
 if __name__ == '__main__':
+
+
+
     # Warning: assuming under ./training_set/ and ./testing_set/ respectively
     train_root = "FLICKR/flickr_full_blur/train_flickr_full_blur/"
     test_root = "FLICKR/flickr_full_blur/"
-    skip_to_metrics = True
+    skip_to_metrics = False
 
     # NOTE: The output images will go under ./testing_res/
     run(train_root, test_root, skip_to_metrics)
