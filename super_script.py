@@ -15,35 +15,6 @@ TRAINING_IMGS = 100
 EPOCHS = 2
 LR = 1e-4
 
-skip_to_metrics = True
-
-# Warning: assuming under ./training_set/ and ./testing_set/
-train_root = "FLICKR/flickr_full_blur/train_flickr_full_blur/"
-test_root = "FLICKR/flickr_full_blur/"
-
-test_name = test_root.split("/")[-1] if test_root.split("/")[-1] != "" else test_root.split("/")[-2]
-
-train_blur = train_root + "blur/"
-train_sharp = train_root + "sharp/"
-
-test_blur = test_root + "blur/"
-test_sharp = test_root + "sharp/"
-
-test_results = test_root
-
-train_prefix = "/training_set/"
-test_prefix = "/testing_set/"
-
-curr_dir = os.getcwd()
-full_train_root_blur = curr_dir + train_prefix + train_root + "blur/"
-full_train_root_sharp = curr_dir + train_prefix + train_root + "sharp/"
-
-full_test_root_sharp = curr_dir + test_prefix + test_root + "sharp/"
-full_test_root_blur = curr_dir + test_prefix + test_root + "blur/"
-
-training_elapsed_time = 0
-testing_elapsed_time = 0
-
 def display_img(rgb_img):
     plt.imshow(rgb_img)
     # to hide tick values on X and Y axis
@@ -75,7 +46,30 @@ def get_sorted_images(folder):
 
     return files
 
-if __name__ == '__main__':
+def run(train_root, test_root, skip_to_metrics):
+
+    test_name = test_root.split("/")[-1] if test_root.split("/")[-1] != "" else test_root.split("/")[-2]
+
+    train_blur = train_root + "blur/"
+    train_sharp = train_root + "sharp/"
+
+    test_blur = test_root + "blur/"
+    test_sharp = test_root + "sharp/"
+
+    test_results = test_root
+
+    train_prefix = "/training_set/"
+    test_prefix = "/testing_set/"
+
+    curr_dir = os.getcwd()
+    full_train_root_blur = curr_dir + train_prefix + train_root + "blur/"
+    full_train_root_sharp = curr_dir + train_prefix + train_root + "sharp/"
+
+    full_test_root_sharp = curr_dir + test_prefix + test_root + "sharp/"
+    full_test_root_blur = curr_dir + test_prefix + test_root + "blur/"
+
+    training_elapsed_time = 0
+    testing_elapsed_time = 0
 
     start_time = time.time()
 
@@ -134,8 +128,7 @@ if __name__ == '__main__':
 
     # ###################### METRICS CALCULATION ######################
 
-    print("[+]: METRICS ")
-    print("=========================================")
+    print("[+]: Calculating Metrics ")
 
     ground_truth_images = get_sorted_images(full_test_root_sharp)
     result_test_images = get_sorted_images("./testing_res/" + test_results)
@@ -152,7 +145,12 @@ if __name__ == '__main__':
 
     ssim_avg, psnr_avg = ssim_sum/total_imgs, psnr_sum/total_imgs
 
-    print("\nFolder: {} | # of imgs: {}\n".format("./testing_res/" + test_results, total_imgs))
+
+    print("\n// ===================================================== //")
+    print("// ---------------------- Results ---------------------- //")
+    print("// ===================================================== //\n")
+
+    print("Folder: {} | # of imgs: {}\n".format("./testing_res/" + test_results, total_imgs))
     print("======== Averages for {} test set ======== ".format(colored(test_name, "red")))
     print("SSIM: {} \nPSNR: {}".format(ssim_avg, psnr_avg))
     print("="*(40+len(test_name)))
@@ -176,4 +174,11 @@ if __name__ == '__main__':
     print("Total elapsed time: {}".format(time.strftime("%H:%M:%S", time.gmtime(total_elapsed_time))))
 
 
+if __name__ == '__main__':
+    # Warning: assuming under ./training_set/ and ./testing_set/ respectively
+    train_root = "FLICKR/flickr_full_blur/train_flickr_full_blur/"
+    test_root = "FLICKR/flickr_full_blur/"
+    skip_to_metrics = True
 
+    # NOTE: The output images will go under ./testing_res/
+    run(train_root, test_root, skip_to_metrics)
