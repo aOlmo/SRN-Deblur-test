@@ -2,21 +2,26 @@ import re
 import os
 import glob
 import cv2
-import numpy as np
+import time
 
+
+from termcolor import colored
 from skimage.measure import compare_ssim as ssim
 from skimage.measure import compare_psnr as psnr
 import matplotlib.pyplot as plt
 
 BATCH_SIZE = 4
-NUM_IMGS = 10
+TRAINING_IMGS = 100
 EPOCHS = 2
 LR = 1e-4
 
 skip_to_metrics = True
 
+# Warning: assuming under ./training_set/ and ./testing_set/
 train_root = "FLICKR/flickr_full_blur/train_flickr_full_blur/"
 test_root = "FLICKR/flickr_full_blur/"
+
+test_name = test_root.split("/")[-1] if test_root.split("/")[-1] != "" else test_root.split("/")[-2]
 
 train_blur = train_root + "blur/"
 train_sharp = train_root + "sharp/"
@@ -36,6 +41,8 @@ full_train_root_sharp = curr_dir + train_prefix + train_root + "sharp/"
 full_test_root_sharp = curr_dir + test_prefix + test_root + "sharp/"
 full_test_root_blur = curr_dir + test_prefix + test_root + "blur/"
 
+training_elapsed_time = 0
+testing_elapsed_time = 0
 
 def display_img(rgb_img):
     plt.imshow(rgb_img)
@@ -70,11 +77,9 @@ def get_sorted_images(folder):
 
 if __name__ == '__main__':
 
-    ground_truth_images = get_sorted_images(full_test_root_sharp)
-    result_test_images = get_sorted_images("./testing_res/" + test_results)
+    start_time = time.time()
 
     if not skip_to_metrics:
-
         # #################### CREATING DATALIST ####################
 
         print("[+]: Creating datalist")
@@ -86,7 +91,7 @@ if __name__ == '__main__':
             line = train_sharp + name + " " + train_blur + name + "\n"
             f.write(line)
 
-            if i == NUM_IMGS:
+            if i == TRAINING_IMGS:
                 print("[+]: Breaking at iteration {}".format(i))
                 break
         f.close()
@@ -94,6 +99,8 @@ if __name__ == '__main__':
         print("=========================================")
 
         # ###################### TRAINING MODEL ######################
+
+        training_start_time = time.time()
 
         print("[+]: Training model")
         cmd_train = "python run_model.py --phase=train --batch=" + str(BATCH_SIZE) + " --lr="+str(LR)+" --epoch=" + str(EPOCHS)
@@ -107,10 +114,13 @@ if __name__ == '__main__':
             print("[-]: Resource Exhausted error when training, exiting")
             exit()
 
-        print("----------------------------------")
+        print("=========================================")
         print("[+]: Model trained")
 
+        training_elapsed_time = time.time() - training_start_time
+
         # ###################### TESTING MODEL ######################
+        testing_start_time = time.time()
 
         print("[+]: Creating test images")
         cmd_test = "python run_model.py --input_path=./testing_set/" + test_blur + " --output_path=./testing_res/" + test_results
@@ -119,7 +129,13 @@ if __name__ == '__main__':
         print(os.popen(cmd_test).read())
         print("[+]: Test images created")
 
+        testing_elapsed_time = time.time() - testing_start_time
+
+
     # ###################### METRICS CALCULATION ######################
+
+    print("[+]: METRICS ")
+    print("=========================================")
 
     ground_truth_images = get_sorted_images(full_test_root_sharp)
     result_test_images = get_sorted_images("./testing_res/" + test_results)
@@ -137,6 +153,27 @@ if __name__ == '__main__':
     ssim_avg, psnr_avg = ssim_sum/total_imgs, psnr_sum/total_imgs
 
     print("\nFolder: {} | # of imgs: {}\n".format("./testing_res/" + test_results, total_imgs))
-    print("======== Averages ======== ")
+    print("======== Averages for {} test set ======== ".format(colored(test_name, "red")))
     print("SSIM: {} \nPSNR: {}".format(ssim_avg, psnr_avg))
-    print("========================== ")
+    print("="*(40+len(test_name)))
+
+    print()
+    print("============== SUMMARY ==============")
+    print("- Training epochs: {}".format(EPOCHS))
+    print("- Batch size: {}".format(BATCH_SIZE))
+    print("- Learning rate: {}".format(LR))
+    print("- Training images: {}".format(TRAINING_IMGS))
+    print("=====================================")
+    print()
+
+    if training_elapsed_time > 0:
+        print("Training elapsed time: {}".format(time.strftime("%H:%M:%S", time.gmtime(training_elapsed_time))))
+
+    if testing_elapsed_time > 0:
+        print("Testing elapsed time: {}".format(time.strftime("%H:%M:%S", time.gmtime(testing_elapsed_time))))
+
+    total_elapsed_time = time.time() - start_time
+    print("Total elapsed time: {}".format(time.strftime("%H:%M:%S", time.gmtime(total_elapsed_time))))
+
+
+
