@@ -10,7 +10,7 @@ from skimage.measure import compare_psnr as psnr
 import matplotlib.pyplot as plt
 
 BATCH_SIZE = 2
-TRAINING_IMGS = 10
+TRAINING_IMGS = 10 
 EPOCHS = 2
 LR = 1e-4
 
