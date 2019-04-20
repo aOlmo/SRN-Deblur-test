@@ -48,6 +48,9 @@ def get_sorted_images(folder):
 def run(train_root, test_root, skip_to_metrics, verbose):
 
     test_name = test_root.split("/")[-1] if test_root.split("/")[-1] != "" else test_root.split("/")[-2]
+    cmd_dims = " --height=256 --width=256"
+    model_type = "lstm"
+    model_chkp = model_type+"/checkpoints/"
 
     train_blur = train_root + "blur/"
     train_sharp = train_root + "sharp/"
@@ -101,7 +104,7 @@ def run(train_root, test_root, skip_to_metrics, verbose):
         training_start_time = time.time()
 
         print("[+]: Training model")
-        cmd_train = "python run_model.py --phase=train --batch=" + str(BATCH_SIZE) + " --lr="+str(LR)+" --epoch=" + str(EPOCHS)
+        cmd_train = "python run_model.py --phase=train --model "+model_type+" --batch=" + str(BATCH_SIZE) + " --lr="+str(LR)+" --epoch=" + str(EPOCHS) + cmd_dims
         print("[+]: "+cmd_train)
         print("=========================================")
 
@@ -122,7 +125,7 @@ def run(train_root, test_root, skip_to_metrics, verbose):
         testing_start_time = time.time()
 
         print("[+]: Creating test images")
-        cmd_test = "python run_model.py --input_path=./testing_set/" + test_blur + " --output_path=./testing_res/" + test_results
+        cmd_test = "python run_model.py --input_path=./testing_set/" + test_blur + " --output_path=./testing_res/" + test_results + cmd_dims + "--model "+model_chkp
         print("[+]: " + cmd_test)
         print("=========================================")
 

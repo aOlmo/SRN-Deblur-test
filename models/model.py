@@ -271,9 +271,9 @@ class DEBLUR(object):
         outputs = self.generator(inputs, reuse=False)
 
         sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
-
+        
         self.saver = tf.train.Saver()
-        self.load(sess, self.train_dir, step=523000)
+        self.load(sess, self.train_dir)
 
         for imgName in imgsName:
             blur = scipy.misc.imread(os.path.join(input_path, imgName))
