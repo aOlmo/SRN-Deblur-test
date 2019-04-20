@@ -125,7 +125,7 @@ def run(train_root, test_root, skip_to_metrics, verbose):
         testing_start_time = time.time()
 
         print("[+]: Creating test images")
-        cmd_test = "python run_model.py --input_path=./testing_set/" + test_blur + " --output_path=./testing_res/" + test_results + cmd_dims + "--model "+model_chkp
+        cmd_test = "python run_model.py --input_path=./testing_set/" + test_blur + " --output_path=./testing_res/" + test_results + cmd_dims + " --model "+model_chkp
         print("[+]: " + cmd_test)
         print("=========================================")
 
