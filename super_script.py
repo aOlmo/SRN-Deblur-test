@@ -188,8 +188,8 @@ def run(train_root, test_root, skip_to_metrics, verbose):
 
 if __name__ == '__main__':
 
-    datasets = ["flickr", "dogs", "gopro"]
-    defects = ["full_blur", "inpaint_blur", "inpaint_white"]
+    datasets = ["flickr"]#, "dogs", "gopro"]
+    defects = ["inpaint_white"]#"full_blur", "inpaint_blur", "inpaint_white"]
 
     for dataset in datasets:
         for defect in defects:
